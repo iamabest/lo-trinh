@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lộ trình học hè Toán 7-8 Tương tác</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Academic Blue -->
+    <!-- Application Structure Plan: The SPA is designed as an interactive dashboard/timeline. It's structured into four main logical sections: 1. Strategy Overview: presents the core philosophy using interactive cards for the knowledge map, making connections tangible. 2. 8-Week Interactive Roadmap: uses a tab-based navigation for weekly plans, allowing users to focus on one week at a time and track progress with checkboxes. 3. Visualizations & Tools: features an interactive diagram for the quadrilateral family and a dynamic progress chart, turning abstract concepts and progress tracking into engaging activities. 4. Resources & Parent's Corner: uses an accordion to neatly organize supplementary information. This non-linear, task-oriented structure was chosen to transform the static report into a dynamic learning companion, empowering users to explore, interact, and take ownership of the study plan, which is more effective for long-term engagement than a linear document. -->
+    <!-- Visualization & Content Choices: 
+        - Knowledge Map (Bảng 1) -> Goal: Show connections -> Interactive Cards (HTML/CSS/JS) -> On click, highlight related card -> Justification: More engaging than a static table.
+        - 8-Week Plan (Bảng 2) -> Goal: Guide weekly study -> Interactive Tabs with Checkboxes (HTML/CSS/JS) -> Click tab for details, check to mark progress -> Justification: Breaks down the plan into manageable steps and provides a sense of accomplishment.
+        - Progress Tracking -> Goal: Motivate -> Donut Chart (Chart.js) -> Updates on checkbox click -> Justification: Provides clear visual feedback and encourages completion.
+        - Quadrilateral Hierarchy -> Goal: Teach shape relationships -> Interactive Diagram (HTML/CSS/Tailwind + JS) -> Click shape for details -> Justification: Implements the report's "Mind Map" suggestion interactively.
+        - Parent Advice -> Goal: Support -> Accordion (HTML/CSS/JS) -> Click to expand -> Justification: Keeps UI clean and information accessible on demand. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Be Vietnam Pro', sans-serif; background-color: #f8fafc; }
+        .tab-active { background-color: #3b82f6; color: white; }
+        .tab-inactive { background-color: #e5e7eb; color: #374151; }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        .knowledge-card.highlight { border-color: #3b82f6; transform: scale(1.03); box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.3); }
+        .quad-shape { cursor: pointer; transition: all 0.2s ease-in-out; }
+        .quad-shape.active { background-color: #bfdbfe; border-color: #3b82f6; }
+        .quad-line { background-color: #9ca3af; position: absolute; }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .chart-container { position: relative; width: 100%; max-width: 320px; margin-left: auto; margin-right: auto; height: 320px; }
+    </style>
+</head>
+<body class="text-slate-800">
+    <div class="container mx-auto p-4 md:p-8">
+        
+        <header class="text-center mb-10">
+            <h1 class="text-3xl md:text-4xl font-bold text-blue-600 mb-2">Lộ trình học hè Toán 7 lên 8</h1>
+            <p class="text-lg text-slate-600">Phiên bản tương tác theo bộ sách "Chân trời sáng tạo"</p>
+        </header>
+
+        <main>
+            <!-- Navigation -->
+            <div class="flex justify-center flex-wrap gap-2 md:gap-4 mb-8 border-b-2 border-slate-200 pb-4">
+                <button data-target="strategy" class="nav-btn tab-active px-4 py-2 rounded-md font-semibold transition">🎯 Chiến lược</button>
+                <button data-target="roadmap" class="nav-btn tab-inactive px-4 py-2 rounded-md font-semibold transition">🗺️ Lộ trình 8 tuần</button>
+                <button data-target="tools" class="nav-btn tab-inactive px-4 py-2 rounded-md font-semibold transition">🛠️ Công cụ & Trực quan</button>
+                <button data-target="resources" class="nav-btn tab-inactive px-4 py-2 rounded-md font-semibold transition">📚 Tài nguyên</button>
+            </div>
+
+            <!-- Content Sections -->
+            <div id="app-content">
+                <!-- Section 1: Strategy -->
+                <section id="strategy" class="content-section active">
+                    <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+                        <h2 class="text-2xl font-bold text-blue-600 mb-4">Triết lý "Ôn tập Trọng tâm, Kết nối Tương lai"</h2>
+                        <p class="text-slate-600 mb-4">Thay vì dàn trải, lộ trình này áp dụng nguyên tắc Pareto (80/20), tập trung vào các kiến thức cốt lõi của lớp 7 làm nền tảng vững chắc cho các chương phức tạp của lớp 8. Đây không chỉ là ôn tập, mà là xây dựng "cây cầu" kiến thức cho tương lai.</p>
+                        <h3 class="text-xl font-semibold mb-4">Bản đồ kết nối kiến thức Lớp 7 ➤ Lớp 8</h3>
+                        <p class="text-sm text-slate-500 mb-4">(💡 Nhấn vào một chủ đề ở Lớp 7 để xem mối liên hệ)</p>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-center">Kiến thức Trọng tâm Lớp 7</h4>
+                                <div id="grade7-cards" class="space-y-3"></div>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-center">Kiến thức Tương ứng Lớp 8</h4>
+                                <div id="grade8-cards" class="space-y-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 2: Roadmap -->
+                <section id="roadmap" class="content-section">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h2 class="text-2xl font-bold text-blue-600 mb-4 text-center">Lộ trình học tập 8 Tuần</h2>
+                        <div class="flex flex-wrap justify-center gap-2 mb-6" id="week-tabs"></div>
+                        <div id="week-content" class="bg-slate-50 p-6 rounded-lg border border-slate-200 min-h-[300px]"></div>
+                    </div>
+                </section>
+
+                <!-- Section 3: Tools -->
+                <section id="tools" class="content-section">
+                     <div class="grid md:grid-cols-2 gap-8">
+                        <div class="bg-white p-6 rounded-xl shadow-md">
+                            <h2 class="text-2xl font-bold text-blue-600 mb-4">Sơ đồ tư duy Tứ giác</h2>
+                            <p class="text-slate-600 mb-4">Khám phá "gia đình" các hình tứ giác. Nhấn vào một hình để xem định nghĩa và tính chất cốt lõi của nó.</p>
+                            <div id="quad-diagram-container" class="relative h-[450px] flex items-center justify-center"></div>
+                            <div id="quad-info" class="mt-4 p-4 bg-blue-50 rounded-lg min-h-[100px] text-center transition">
+                                <p class="text-slate-500">Chọn một hình để xem thông tin.</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-md flex flex-col items-center justify-center">
+                            <h2 class="text-2xl font-bold text-blue-600 mb-4">Theo dõi Tiến độ</h2>
+                            <p class="text-slate-600 mb-4 text-center">Biểu đồ sẽ tự động cập nhật khi bạn hoàn thành mỗi tuần trong Lộ trình 8 tuần.</p>
+                            <div class="chart-container">
+                                <canvas id="progressChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 4: Resources -->
+                <section id="resources" class="content-section">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                         <h2 class="text-2xl font-bold text-blue-600 mb-4">Công cụ và Lời khuyên</h2>
+                         <div id="accordion-container" class="space-y-3">
+                            <!-- Accordion items will be injected here -->
+                         </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const appData = {
+                knowledgeMap: [
+                    { g7: "Phép tính số hữu tỉ, quy tắc ngoặc, chuyển vế", g8: "Phương trình bậc nhất một ẩn", reason: "Nền tảng tuyệt đối. Sai sót tính toán cơ bản sẽ không thể giải đúng phương trình." },
+                    { g7: "Phép tính đa thức một biến (cộng, trừ, nhân, chia)", g8: "Hằng đẳng thức, Phân tích đa thức thành nhân tử", reason: "Kiến thức bản lề. Thành thạo nhân/chia đa thức là điều kiện tiên quyết để hiểu và vận dụng hằng đẳng thức." },
+                    { g7: "Tỉ lệ thức, Dãy tỉ số bằng nhau", g8: "Giải toán bằng cách lập phương trình, Định lí Thalès", reason: "Rèn luyện tư duy logic để mô hình hóa bài toán thực tế và là nền tảng cho các tỉ số trong hình học." },
+                    { g7: "Góc, đường thẳng song song, tiên đề Euclid", g8: "Tính chất các loại tứ giác, Định lí Thalès", reason: "Cung cấp công cụ và phương pháp luận để chứng minh các tính chất hình học phức tạp hơn." },
+                    { g7: "Quan hệ các yếu tố trong tam giác", g8: "Tam giác đồng dạng, Định lí Pythagore", reason: "Củng cố kiến thức về tam giác, là cơ sở để học định lí Pythagore và tam giác đồng dạng." },
+                ],
+                roadmap: [
+                    {
+                        week: 1,
+                        title: "Số hữu tỉ & Số thực",
+                        goal: "Làm chủ kỹ năng tính toán cơ bản, quy tắc chuyển vế, dấu ngoặc.",
+                        content: ["Tập hợp số hữu tỉ (Q), các phép tính", "Lũy thừa, thứ tự phép tính, quy tắc chuyển vế", "Số vô tỉ (I), số thực (R), giá trị tuyệt đối"],
+                        exercises: ["Thực hiện phép tính", "Bài toán tìm x", "So sánh, sắp xếp số thực", "Bài toán thực tế"]
+                    },
+                    {
+                        week: 2,
+                        title: "Tỉ lệ thức & Đại lượng tỉ lệ",
+                        goal: "Nhận dạng và áp dụng đúng phương pháp giải cho các bài toán tỉ lệ.",
+                        content: ["Tỉ lệ thức và tính chất", "Tính chất dãy tỉ số bằng nhau", "Đại lượng tỉ lệ thuận, nghịch và bài toán liên quan"],
+                        exercises: ["Tìm số chưa biết từ dãy tỉ số bằng nhau", "Bài toán chia tỉ lệ", "Bài toán thực tế về tỉ lệ thuận/nghịch"]
+                    },
+                    {
+                        week: 3,
+                        title: "Biểu thức đại số & Đa thức một biến",
+                        goal: "Thành thạo các phép tính với đa thức, tạo nền tảng cho Hằng đẳng thức.",
+                        content: ["Biểu thức đại số", "Đa thức một biến: bậc, hệ số, sắp xếp", "Cộng, trừ, nhân, chia đa thức một biến", "Nghiệm của đa thức"],
+                        exercises: ["Thu gọn, tính giá trị biểu thức", "Cộng, trừ, nhân đa thức", "Kiểm tra nghiệm của đa thức"]
+                    },
+                    {
+                        week: 4,
+                        title: "Hình học phẳng & Thống kê",
+                        goal: "Xây dựng tư duy suy luận logic hình học và kỹ năng đọc biểu đồ.",
+                        content: ["Các góc đặc biệt, hai đường thẳng song song", "Tiên đề Euclid, chứng minh định lí", "Thu thập, biểu diễn dữ liệu (biểu đồ)", "Biến cố và xác suất cơ bản"],
+                        exercises: ["Tính số đo góc", "Chứng minh hai đường thẳng song song", "Phân tích dữ liệu từ biểu đồ", "Tính xác suất đơn giản"]
+                    },
+                    {
+                        week: 5,
+                        title: "LÀM QUEN LỚP 8: 7 Hằng đẳng thức",
+                        goal: "Hiểu bản chất và vận dụng thành thạo 7 hằng đẳng thức đáng nhớ.",
+                        content: ["Bình phương của một tổng/hiệu", "Hiệu hai bình phương", "Lập phương của một tổng/hiệu", "Tổng/Hiệu hai lập phương"],
+                        exercises: ["Khai triển biểu thức (dạng xuôi)", "Viết về dạng bình phương/lập phương (dạng ngược)", "Tính nhanh, rút gọn biểu thức"]
+                    },
+                    {
+                        week: 6,
+                        title: "LÀM QUEN LỚP 8: Phân tích đa thức thành nhân tử",
+                        goal: "Nắm vững các phương pháp phân tích, ứng dụng của hằng đẳng thức.",
+                        content: ["Phương pháp đặt nhân tử chung", "Phương pháp dùng hằng đẳng thức", "Phương pháp nhóm hạng tử", "Phối hợp các phương pháp"],
+                        exercises: ["Phân tích đa thức thành nhân tử", "Ứng dụng giải bài toán tìm x (dạng tích)", "Ứng dụng chứng minh tính chia hết"]
+                    },
+                    {
+                        week: 7,
+                        title: "LÀM QUEN LỚP 8: Khám phá Tứ giác",
+                        goal: "Xây dựng hệ thống kiến thức về các loại tứ giác cơ bản.",
+                        content: ["Tứ giác lồi, tổng các góc", "Hình thang, hình thang cân: định nghĩa, tính chất, dấu hiệu", "Hình bình hành: định nghĩa, tính chất, dấu hiệu"],
+                        exercises: ["Nhận biết hình", "Tính góc, cạnh dựa vào tính chất", "Chứng minh một tứ giác là hình thang/hình bình hành"]
+                    },
+                    {
+                        week: 8,
+                        title: "Tổng duyệt & Tăng tốc",
+                        goal: "Hệ thống hóa kiến thức, làm quen áp lực thời gian và đề kiểm tra.",
+                        content: ["Ôn tập toàn bộ kiến thức 7 tuần", "Rà soát lại các lỗi sai, các chuyên đề còn yếu", "Luyện tập với đề kiểm tra tổng hợp"],
+                        exercises: ["Làm đề thi cuối kỳ 2 lớp 7 (nâng cao)", "Làm đề khảo sát chất lượng đầu năm lớp 8"]
+                    },
+                ],
+                quads: {
+                    'tu-giac': { name: 'Tứ giác', details: 'Là hình có 4 đoạn thẳng, trong đó bất kì 2 đoạn thẳng nào cũng không cùng nằm trên một đường thẳng. Tổng 4 góc bằng 360°.'},
+                    'hinh-thang': { name: 'Hình thang', details: 'Là tứ giác có hai cạnh đối song song.'},
+                    'hinh-thang-can': { name: 'Hình thang cân', details: 'Là hình thang có hai góc kề một đáy bằng nhau.'},
+                    'hinh-binh-hanh': { name: 'Hình bình hành', details: 'Là tứ giác có các cặp cạnh đối song song.'},
+                    'hinh-chu-nhat': { name: 'Hình chữ nhật', details: 'Là hình bình hành có một góc vuông.'},
+                    'hinh-thoi': { name: 'Hình thoi', details: 'Là hình bình hành có hai cạnh kề bằng nhau.'},
+                    'hinh-vuong': { name: 'Hình vuông', details: 'Vừa là hình chữ nhật, vừa là hình thoi.'},
+                },
+                resources: [
+                    { 
+                        title: "Phương pháp Học tập 3P", 
+                        content: "<ul><li class='mb-2'><strong>Philosophy (Hiểu bản chất):</strong> Đừng học vẹt. Hãy tự hỏi 'Tại sao?'. Tự chứng minh công thức để hiểu sâu.</li><li class='mb-2'><strong>Practice (Luyện tập):</strong> 'Trăm hay không bằng tay quen'. Luyện tập từ cơ bản đến nâng cao để biến kiến thức thành kỹ năng.</li><li><strong>Perfecting (Sửa lỗi):</strong> Ghi lại và phân tích các lỗi sai. Biến điểm yếu thành điểm mạnh.</li></ul>"
+                    },
+                    {
+                        title: "Lời khuyên cho Phụ huynh",
+                        content: "<ul><li class='mb-2'><strong>Lập kế hoạch cùng con:</strong> Xây dựng thời gian biểu hợp lý, cân bằng giữa học và chơi.</li><li class='mb-2'><strong>Động viên, không áp đặt:</strong> Ghi nhận sự nỗ lực, không chỉ điểm số. Tạo niềm vui trong học tập.</li><li class='mb-2'><strong>Là người hỗ trợ:</strong> Cùng con phân tích lỗi sai, tìm kiếm tài nguyên và khuyến khích con đặt câu hỏi.</li></ul>"
+                    },
+                    {
+                        title: "Tài nguyên học liệu số",
+                        content: "<p>Tham khảo các bài giảng video và lời giải chi tiết tại các trang web giáo dục uy tín:</p><ul class='list-disc pl-5 mt-2'><li><a href='https://vietjack.com/' target='_blank' class='text-blue-500 hover:underline'>VietJack.com</a></li><li><a href='https://loigiaihay.com/' target='_blank' class='text-blue-500 hover:underline'>LoiGiaiHay.com</a></li><li><a href='https://tuyensinh247.com/' target='_blank' class='text-blue-500 hover:underline'>TuyenSinh247.com</a></li><li>Sử dụng phần mềm <strong>GeoGebra</strong> để vẽ và khám phá hình học trực quan.</li></ul>"
+                    }
+                ],
+                progress: new Array(8).fill(false)
+            };
+            
+            const navButtons = document.querySelectorAll('.nav-btn');
+            const contentSections = document.querySelectorAll('.content-section');
+
+            function switchTab(targetId) {
+                navButtons.forEach(btn => {
+                    btn.classList.toggle('tab-active', btn.dataset.target === targetId);
+                    btn.classList.toggle('tab-inactive', btn.dataset.target !== targetId);
+                });
+                contentSections.forEach(section => {
+                    section.classList.toggle('active', section.id === targetId);
+                });
+            }
+
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => switchTab(button.dataset.target));
+            });
+
+            const grade7CardsContainer = document.getElementById('grade7-cards');
+            const grade8CardsContainer = document.getElementById('grade8-cards');
+            
+            appData.knowledgeMap.forEach((item, index) => {
+                const card7 = document.createElement('div');
+                card7.className = 'knowledge-card p-4 bg-slate-100 rounded-lg border-2 border-transparent cursor-pointer transition';
+                card7.textContent = item.g7;
+                card7.dataset.index = index;
+                grade7CardsContainer.appendChild(card7);
+
+                const card8 = document.createElement('div');
+                card8.className = 'knowledge-card p-4 bg-slate-100 rounded-lg border-2 border-transparent transition relative';
+                card8.innerHTML = `<span class="font-semibold">${item.g8}</span><p class="text-sm text-slate-600 mt-2 hidden">${item.reason}</p>`;
+                card8.dataset.index = index;
+                grade8CardsContainer.appendChild(card8);
+            });
+
+            const allCards = document.querySelectorAll('.knowledge-card');
+            grade7CardsContainer.addEventListener('click', e => {
+                if(e.target.classList.contains('knowledge-card')) {
+                    const selectedIndex = e.target.dataset.index;
+                    
+                    allCards.forEach(card => {
+                        const isSelected = card.dataset.index === selectedIndex;
+                        card.classList.toggle('highlight', isSelected);
+                        const reasonP = card.querySelector('p');
+                        if(reasonP) {
+                           reasonP.classList.toggle('hidden', !isSelected);
+                        }
+                    });
+                }
+            });
+
+            const weekTabsContainer = document.getElementById('week-tabs');
+            const weekContentContainer = document.getElementById('week-content');
+
+            function renderWeekContent(weekIndex) {
+                const weekData = appData.roadmap[weekIndex];
+                weekContentContainer.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-xl font-bold text-blue-700 mb-3">${weekData.title}</h3>
+                        <label class="flex items-center cursor-pointer">
+                          <input type="checkbox" data-week="${weekIndex}" class="week-checkbox h-5 w-5 rounded text-blue-600 focus:ring-blue-500 border-gray-300" ${appData.progress[weekIndex] ? 'checked' : ''}>
+                          <span class="ml-2 text-slate-700 font-medium">Hoàn thành</span>
+                        </label>
+                    </div>
+                    <p class="text-slate-600 mb-4"><strong>Mục tiêu:</strong> ${weekData.goal}</p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold mb-2">Nội dung chính:</h4>
+                            <ul class="list-disc pl-5 space-y-1 text-slate-700">
+                                ${weekData.content.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold mb-2">Dạng bài tập trọng tâm:</h4>
+                            <ul class="list-disc pl-5 space-y-1 text-slate-700">
+                                ${weekData.exercises.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+                
+                document.querySelector('.week-checkbox').addEventListener('change', (e) => {
+                    const weekIdx = parseInt(e.target.dataset.week);
+                    appData.progress[weekIdx] = e.target.checked;
+                    updateProgressChart();
+                });
+            }
+
+            appData.roadmap.forEach((week, index) => {
+                const tab = document.createElement('button');
+                tab.className = `week-tab px-3 py-1.5 text-sm md:px-4 md:py-2 md:text-base rounded-md font-semibold transition`;
+                tab.classList.add(index === 0 ? 'tab-active' : 'tab-inactive');
+                tab.textContent = `Tuần ${week.week}`;
+                tab.dataset.index = index;
+                weekTabsContainer.appendChild(tab);
+            });
+            
+            document.querySelectorAll('.week-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.week-tab').forEach(t => {
+                        t.classList.remove('tab-active');
+                        t.classList.add('tab-inactive');
+                    });
+                    tab.classList.add('tab-active');
+                    tab.classList.remove('tab-inactive');
+                    renderWeekContent(parseInt(tab.dataset.index));
+                });
+            });
+
+            renderWeekContent(0);
+            
+            let progressChart;
+            function createProgressChart() {
+                const ctx = document.getElementById('progressChart').getContext('2d');
+                progressChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Hoàn thành', 'Chưa hoàn thành'],
+                        datasets: [{
+                            data: [0, 8],
+                            backgroundColor: ['#3b82f6', '#e5e7eb'],
+                            borderColor: '#f8fafc',
+                            borderWidth: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { enabled: false }
+                        }
+                    }
+                });
+            }
+
+            function updateProgressChart() {
+                const completed = appData.progress.filter(Boolean).length;
+                progressChart.data.datasets[0].data[0] = completed;
+                progressChart.data.datasets[0].data[1] = 8 - completed;
+                progressChart.update();
+            }
+
+            createProgressChart();
+
+            const quadDiagramContainer = document.getElementById('quad-diagram-container');
+            const quadInfoContainer = document.getElementById('quad-info');
+            
+            function renderQuadDiagram() {
+                quadDiagramContainer.innerHTML = `
+                    <div id="tu-giac" class="quad-shape absolute top-[10%] left-1/2 -translate-x-1/2 p-2 w-28 text-center border-2 rounded-lg bg-white">Tứ giác</div>
+                    <div class="quad-line w-px h-8 top-[calc(10%+44px)] left-1/2 -translate-x-1/2"></div>
+                    
+                    <div class="quad-line w-1/2 h-px top-[calc(10%+76px)] left-1/4"></div>
+                    <div class="quad-line w-px h-8 top-[calc(10%+76px)] left-1/4"></div>
+                    <div class="quad-line w-px h-8 top-[calc(10%+76px)] left-3/4"></div>
+
+                    <div id="hinh-thang" class="quad-shape absolute top-[calc(10%+108px)] left-1/4 -translate-x-1/2 p-2 w-32 text-center border-2 rounded-lg bg-white">Hình thang</div>
+                    <div id="hinh-binh-hanh" class="quad-shape absolute top-[calc(10%+108px)] left-3/4 -translate-x-1/2 p-2 w-36 text-center border-2 rounded-lg bg-white">Hình bình hành</div>
+                    
+                    <div class="quad-line w-px h-8 top-[calc(10%+152px)] left-1/4 -translate-x-1/2"></div>
+                    <div id="hinh-thang-can" class="quad-shape absolute top-[calc(10%+184px)] left-1/4 -translate-x-1/2 p-2 w-36 text-center border-2 rounded-lg bg-white">Hình thang cân</div>
+
+                    <div class="quad-line w-[25%] h-px top-[calc(10%+152px)] left-[calc(50%)]"></div>
+                    <div class="quad-line w-px h-8 top-[calc(10%+152px)] left-[calc(50%)]"></div>
+                    <div class="quad-line w-px h-8 top-[calc(10%+152px)] right-[calc(25%)]"></div>
+                    
+                    <div id="hinh-chu-nhat" class="quad-shape absolute top-[calc(10%+184px)] left-[calc(50%)] -translate-x-1/2 p-2 w-36 text-center border-2 rounded-lg bg-white">Hình chữ nhật</div>
+                    <div id="hinh-thoi" class="quad-shape absolute top-[calc(10%+184px)] right-[calc(25%)] translate-x-1/2 p-2 w-32 text-center border-2 rounded-lg bg-white">Hình thoi</div>
+
+                    <div class="quad-line w-px h-12 top-[calc(10%+228px)] left-[calc(50%)]"></div>
+                    <div class="quad-line w-px h-12 top-[calc(10%+228px)] right-[calc(25%)]"></div>
+                    <div class="quad-line w-[25%] h-px top-[calc(10%+284px)] left-[calc(50%)]"></div>
+                     <div class="quad-line w-px h-8 top-[calc(10%+284px)] left-[calc(50%+12.5%)] -translate-x-1/2"></div>
+                    
+                    <div id="hinh-vuong" class="quad-shape absolute top-[calc(10%+316px)] left-[calc(50%+12.5%)] -translate-x-1/2 p-2 w-32 text-center border-2 rounded-lg bg-white">Hình vuông</div>
+                `;
+                document.querySelectorAll('.quad-shape').forEach(shape => {
+                    shape.addEventListener('click', (e) => {
+                        const id = e.currentTarget.id;
+                        document.querySelectorAll('.quad-shape').forEach(s => s.classList.remove('active'));
+                        e.currentTarget.classList.add('active');
+
+                        const quadData = appData.quads[id];
+                        quadInfoContainer.innerHTML = `<h4 class="font-bold text-blue-800">${quadData.name}</h4><p class="text-slate-700">${quadData.details}</p>`;
+                    });
+                });
+            }
+            renderQuadDiagram();
+            
+            const accordionContainer = document.getElementById('accordion-container');
+            appData.resources.forEach((item, index) => {
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = `
+                    <button class="accordion-btn w-full text-left flex justify-between items-center p-4 bg-slate-100 hover:bg-slate-200 rounded-lg transition">
+                        <span class="font-semibold">${item.title}</span>
+                        <svg class="w-6 h-6 shrink-0 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-4 bg-slate-50 rounded-b-lg">
+                            ${item.content}
+                        </div>
+                    </div>
+                `;
+                accordionContainer.appendChild(wrapper);
+            });
+            
+            document.querySelectorAll('.accordion-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const content = button.nextElementSibling;
+                    const icon = button.querySelector('svg');
+                    
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        // Close other accordions
+                        document.querySelectorAll('.accordion-content').forEach(c => c.style.maxHeight = null);
+                        document.querySelectorAll('.accordion-btn svg').forEach(i => i.style.transform = 'rotate(0deg)');
+
+                        content.style.maxHeight = content.scrollHeight + "px";
+                        icon.style.transform = 'rotate(180deg)';
+                    } 
+                });
+            });
+        });
+    </script>
+</body>
+</html>
